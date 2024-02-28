@@ -12,6 +12,7 @@ import AuthLayout from './AuthLayout'
 import Button from "./Button";
 import InputBox from "./InputBox";
 import Select from "./Select";
+import Loader from "./Loader";
 export {
      Header, 
      Footer, 
@@ -26,5 +27,6 @@ export {
      AuthLayout,
      Button,
      InputBox,
-     Select
+     Select,
+     Loader
 }

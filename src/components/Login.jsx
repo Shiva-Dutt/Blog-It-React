@@ -5,6 +5,7 @@ import { Button, InputBox, Logo } from './index'
 import { useDispatch } from 'react-redux'
 import authService from '../appwrite/auth'
 import { useForm } from 'react-hook-form'
+import { Loader } from './index'
 
 function Login() {
     const navigate = useNavigate()
