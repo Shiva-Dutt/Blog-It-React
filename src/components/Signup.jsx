@@ -2,18 +2,20 @@ import React, { useState } from 'react'
 import authService from '../appwrite/auth'
 import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../store/authSlice'
-import { Button, InputBox, Logo } from './index'
+import { Button, InputBox, Logo, Loader } from './index'
 import { useDispatch } from 'react-redux'
-import { set, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 function Signup() {
     const navigate = useNavigate()
     const [error, setError] = useState("")
     const dispatch = useDispatch()
     const { register, handleSubmit } = useForm()
+    const [loading, setLoading] = useState(false)
 
     const create = async (data) => {
         setError("")
+        setLoading(true)
         try {
             const userData = await authService.createAccount(data)
             if (userData) {
@@ -23,23 +25,25 @@ function Signup() {
             }
         } catch (error) {
             setError(error.message)
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
-        <div className="flex items-center justify-center">
-            <div className={`mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10`}>
+        <div className="flex items-center justify-center md:min-h-[80vh]">
+            <div className={`mx-auto w-[85%] md:w-full md:max-w-[28rem]  rounded-xl p-5 md:p-10   border-2 border-[#33BBCF]`}>
                 <div className="mb-2 flex justify-center">
                     <span className="inline-block w-full max-w-[100px]">
                         <Logo width="100%" />
                     </span>
                 </div>
                 <h2 className="text-center text-2xl font-bold leading-tight">Sign up to create account</h2>
-                <p className="mt-2 text-center text-base text-black/60">
+                <p className="mt-2 text-center text-base text-white/60">
                     Already have an account?&nbsp;
                     <Link
                         to="/login"
-                        className="font-medium text-primary transition-all duration-200 hover:underline"
+                        className="font-medium text-white/80 hover:text-white transition-all duration-200 hover:underline"
                     >
                         Sign In
                     </Link>
@@ -75,9 +79,14 @@ function Signup() {
                                 required: true,
                             })}
                         />
-                        <Button type="submit" className="w-full">
+                        {loading? 
+                        <div className='w-full grid place-items-center'> <Loader></Loader></div>
+                        :
+                        <Button type="submit"
+                        className=" py-2 px-5 w-full text-black font-semibold button-custom rounded-xl shadow-lg   hover:cursor-pointer"
+                        >
                             Create Account
-                        </Button>
+                        </Button>}
                     </div>
                 </form>
             </div>
