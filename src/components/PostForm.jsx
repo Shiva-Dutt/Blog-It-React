@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from 'react'
 import {useForm} from 'react-hook-form'
-import {Button, InputBox, Select, RTE} from './index'
+import {Button, InputBox, Select,Loader, RTE} from './index'
 import appwriteService from '../appwrite/config'
 import { useNavigate } from 'react-router-dom'
 import { useSelector} from 'react-redux'
@@ -17,8 +17,10 @@ export default function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
+    const [loading, setLoading] = useState(false)
 
     const submit = async (data) => {
+        setLoading(true)
         if (post) {
             const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
 
@@ -32,20 +34,28 @@ export default function PostForm({ post }) {
             });
 
             if (dbPost) {
-                navigate(`/post/${dbPost.$id}`);
+                setLoading(false)
+                navigate(`/post/${post.$id}`);
             }
         } else {
             const file = await appwriteService.uploadFile(data.image[0]);
 
             if (file) {
-                const fileId = file.$id;
-                data.featuredImage = fileId;
-                const dbPost = await appwriteService.createPost({ ...data, userid: userData.$id });
-
-                if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`);
-                }
+                const fileId = file.$id
+                data.featuredImage = fileId
+                try {
+                    let dbPost = await appwriteService.createPost({
+                        ...data,
+                        userId: userData.$id
+                    })
+                    if(dbPost){
+                        navigate(`/post/${dbPost.$id}`)
+                    }
+                } catch (error) {
+                    prompt(error.message)
+                } finally {setLoading(false)}
             }
+            
         }
     };
 
@@ -72,7 +82,7 @@ export default function PostForm({ post }) {
 
     return (
         <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
-            <div className="w-2/3 px-2">
+            <div className="w-full lg:w-2/3 px-2">
                 <InputBox
                     label="Title :"
                     placeholder="Title"
@@ -90,7 +100,7 @@ export default function PostForm({ post }) {
                 />
                 <RTE label="Content :" name="content" control={control} defaultValue={getValues("content")} />
             </div>
-            <div className="w-1/3 px-2">
+            <div className="w-full lg:w-1/3 px-2">
                 <InputBox
                     label="Featured Image :"
                     type="file"
@@ -113,9 +123,12 @@ export default function PostForm({ post }) {
                     className="mb-4"
                     {...register("status", { required: true })}
                 />
-                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full">
+                {loading? 
+                    <div className='w-full grid place-items-center'> <Loader></Loader></div>
+                    :
+                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className= {` ${post? "  hover:shadow-green-500 " : " hover:shadow-[#5ce1e6] cyan-button"} text-black shadow-sm hover:cursor-pointer duration-200 hover:drop-shadow-2xl rounded-lg w-full`} >
                     {post ? "Update" : "Submit"}
-                </Button>
+                </Button>}
             </div>
         </form>
     );
